@@ -1,8 +1,8 @@
 # Real-Time Code Editor
 
 ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
-![GitHub stars](https://img.shields.io/github/stars/YOUR_USERNAME/YOUR_REPO_NAME?style=social)
-![GitHub issues](https://img.shields.io/github/issues/YOUR_USERNAME/YOUR_REPO_NAME)
+![GitHub stars](https://img.shields.io/github/stars/Pcquifume/Real-time-code-editor?style=social)
+![GitHub issues](https://img.shields.io/github/issues/Pcquifume/Real-time-code-editor)
 
 A web-based code editor built with the Monaco Editor, supporting real-time HTML, CSS, and JavaScript editing with a live preview. Features include template insertion, a snippet library, and a resizable divider for a customizable layout.
 
@@ -52,7 +52,7 @@ Try the editor live by opening `index.html` in a browser or hosting it on a web 
 
 ## Project Structure
 ```
-YOUR_REPO_NAME/
+Real-time-code-editor/
 ├── index.html       # Main HTML structure
 ├── styles.css       # CSS styles for layout and UI
 ├── script.js        # JavaScript logic for editors and interactions
