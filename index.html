@@ -1,0 +1,190 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Éditeur de Code en Temps Réel</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <div class="editor-container">
+            <div class="editor">
+                <label for="html">HTML
+                    <div>
+                        <button id="html-template-btn" class="template-button">Insérer modèle HTML</button>
+                        <button id="html-library-btn" class="library-button">Bibliothèque</button>
+                    </div>
+                </label>
+                <div id="html-editor" class="monaco-editor-container"></div>
+                <div id="html-library" class="library-panel">
+                    <div class="library-item" data-snippet='<h1>Grand Titre</h1>'>
+                        <span>Grand titre</span>
+                        <span class="snippet">h1</span>
+                    </div>
+                    <div class="library-item" data-snippet='<p>Paragraphe de texte</p>'>
+                        <span>Paragraphe</span>
+                        <span class="snippet">p</span>
+                    </div>
+                    <div class="library-item" data-snippet='<div>Conteneur</div>'>
+                        <span>Conteneur</span>
+                        <span class="snippet">div</span>
+                    </div>
+                    <div class="library-item" data-snippet='<button>Cliquer ici</button>'>
+                        <span>Bouton</span>
+                        <span class="snippet">button</span>
+                    </div>
+                    <div class="library-item" data-snippet='<a href="#">Lien</a>'>
+                        <span>Lien hypertexte</span>
+                        <span class="snippet">a</span>
+                    </div>
+                    <div class="library-item" data-snippet='<input type="text" placeholder="Saisir texte">'>
+                        <span>Champ de saisie</span>
+                        <span class="snippet">input</span>
+                    </div>
+                    <div class="library-item" data-snippet='<ul>\n    <li>Élément 1</li>\n    <li>Élément 2</li>\n</ul>'>
+                        <span>Liste non ordonnée</span>
+                        <span class="snippet">ul</span>
+                    </div>
+                    <div class="library-item" data-snippet='<img src="" alt="Image">'>
+                        <span>Image</span>
+                        <span class="snippet">img</span>
+                    </div>
+                </div>
+            </div>
+            <div class="editor">
+                <label for="css">CSS
+                    <div>
+                        <button id="css-template-btn" class="template-button">Insérer modèle CSS</button>
+                        <button id="css-library-btn" class="library-button">Bibliothèque</button>
+                    </div>
+                </label>
+                <div id="css-editor" class="monaco-editor-container"></div>
+                <div id="css-library" class="library-panel">
+                    <div class="library-item" data-snippet='font-size: 16px;'>
+                        <span>Taille de police</span>
+                        <span class="snippet">font-size</span>
+                    </div>
+                    <div class="library-item" data-snippet='color: #333;'>
+                        <span>Couleur du texte</span>
+                        <span class="snippet">color</span>
+                    </div>
+                    <div class="library-item" data-snippet='margin: 0;'>
+                        <span>Marge</span>
+                        <span class="snippet">margin</span>
+                    </div>
+                    <div class="library-item" data-snippet='padding: 10px;'>
+                        <span>Remplissage</span>
+                        <span class="snippet">padding</span>
+                    </div>
+                    <div class="library-item" data-snippet='background-color: #fff;'>
+                        <span>Couleur de fond</span>
+                        <span class="snippet">background-color</span>
+                    </div>
+                    <div class="library-item" data-snippet='display: flex;'>
+                        <span>Disposition flexbox</span>
+                        <span class="snippet">display: flex</span>
+                    </div>
+                    <div class="library-item" data-snippet='border: 1px solid #000;'>
+                        <span>Bordure</span>
+                        <span class="snippet">border</span>
+                    </div>
+                    <div class="library-item" data-snippet='text-align: center;'>
+                        <span>Alignement du texte</span>
+                        <span class="snippet">text-align</span>
+                    </div>
+                </div>
+            </div>
+            <div class="editor">
+                <label for="js">JavaScript
+                    <div>
+                        <button id="js-template-btn" class="template-button">Insérer modèle JS</button>
+                        <button id="js-library-btn" class="library-button">Bibliothèque</button>
+                    </div>
+                </label>
+                <div id="js-editor" class="monaco-editor-container"></div>
+                <div id="js-library" class="library-panel">
+                    <div class="library-item" data-snippet='console.log("Message");'>
+                        <span>Log dans la console</span>
+                        <span class="snippet">console.log</span>
+                    </div>
+                    <div class="library-item" data-snippet='alert("Bonjour !");'>
+                        <span>Alerte</span>
+                        <span class="snippet">alert</span>
+                    </div>
+                    <div class="library-item" data-snippet='document.querySelector("");'>
+                        <span>Sélecteur DOM</span>
+                        <span class="snippet">querySelector</span>
+                    </div>
+                    <div class="library-item" data-snippet='element.addEventListener("click", () => {});'>
+                        <span>Écouteur d'événement</span>
+                        <span class="snippet">addEventListener</span>
+                    </div>
+                    <div class="library-item" data-snippet='setTimeout(() => {}, 1000);'>
+                        <span>Minuteur</span>
+                        <span class="snippet">setTimeout</span>
+                    </div>
+                    <div class="library-item" data-snippet='fetch("").then(res => res.json()).then(data => {});'>
+                        <span>Requête HTTP</span>
+                        <span class="snippet">fetch</span>
+                    </div>
+                    <div class="library-item" data-snippet='document.createElement("div");'>
+                        <span>Créer élément DOM</span>
+                        <span class="snippet">createElement</span>
+                    </div>
+                    <div class="library-item" data-snippet='element.classList.toggle("class");'>
+                        <span>Basculer classe CSS</span>
+                        <span class="snippet">classList.toggle</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="divider"></div>
+        <div class="preview">
+            <iframe id="preview"></iframe>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/monaco-editor@0.34.0/min/vs/loader.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
